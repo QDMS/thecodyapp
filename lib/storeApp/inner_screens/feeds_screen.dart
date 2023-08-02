@@ -6,6 +6,7 @@ import 'package:thecodyapp/chatApp/common/utils/colors.dart';
 import 'package:thecodyapp/storeApp/consts/utils.dart';
 import 'package:thecodyapp/storeApp/models/products_model.dart';
 import 'package:thecodyapp/storeApp/providers/products_provider.dart';
+import 'package:thecodyapp/storeApp/widgets/empty_products_screen.dart';
 import 'package:thecodyapp/storeApp/widgets/feed_items.dart';
 
 class FeedsScreen extends StatefulWidget {
@@ -26,22 +27,24 @@ class _FeedsScreenState extends State<FeedsScreen> {
     super.dispose();
   }
 
-  // @override
-  // void initState() {
-  //   final productsProvider = Provider.of<ProductsProvider>(
-  //     context,
-  //     listen: false,
-  //   );
-  //   productsProvider.fetchProducts();
-  //   super.initState();
-  // }
+  @override
+  void initState() {
+    final productsProvider = Provider.of<ProductsProvider>(
+      context,
+      listen: false,
+    );
+    productsProvider.fetchProducts();
+    super.initState();
+  }
+
+    List<ProductModel> listProductsSearch = [];
 
   @override
   Widget build(BuildContext context) {
     bool isEmpty = false;
     Size size = Utils(context).getScreenSize;
-    final productProviders = Provider.of<ProductsProvider>(context);
-    List<ProductModel> allProducts = productProviders.getProducts;
+    final productsProviders = Provider.of<ProductsProvider>(context);
+    List<ProductModel> allProducts = productsProviders.getProducts;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: appBarColor,
@@ -86,7 +89,10 @@ class _FeedsScreenState extends State<FeedsScreen> {
                 cursorColor: Colors.black,
                 controller: _searchTextController,
                 onChanged: (value) {
-                  setState(() {});
+                   setState(() {
+                            listProductsSearch =
+                                productsProviders.searchQuery(value);
+                          });
                 },
                 textAlignVertical: TextAlignVertical.center,
                 decoration: InputDecoration(
@@ -126,22 +132,30 @@ class _FeedsScreenState extends State<FeedsScreen> {
                 ),
               ),
             ),
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              // crossAxisSpacing: 15,
-              childAspectRatio: size.width / (size.height * 0.55),
-              children: List.generate(
-                allProducts.length,
-                (index) {
-                  return ChangeNotifierProvider.value(
-                    value: allProducts[index],
-                    child: const FeedsWidget(),
-                  );
-                },
-              ),
-            ),
+          _searchTextController.text.isNotEmpty &&
+                          listProductsSearch.isEmpty
+                      ? EmptyProdWidget(
+                          text: 'No Product Found Please Try Another Keyword')
+                      : GridView.count(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          crossAxisCount: 2,
+                          // crossAxisSpacing: 15,
+                          childAspectRatio: size.width / (size.height * 0.55),
+                          children: List.generate(
+                            _searchTextController.text.isNotEmpty
+                                ? listProductsSearch.length
+                                : allProducts.length,
+                            (index) {
+                              return ChangeNotifierProvider.value(
+                                value: _searchTextController.text.isNotEmpty
+                                    ? listProductsSearch[index]
+                                    : allProducts[index],
+                                child: const FeedsWidget(),
+                              );
+                            },
+                          ),
+                        ),
           ],
         ),
       ),

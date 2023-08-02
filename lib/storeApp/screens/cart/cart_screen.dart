@@ -5,6 +5,7 @@ import 'package:thecodyapp/chatApp/common/utils/colors.dart';
 import 'package:thecodyapp/storeApp/consts/global_methods.dart';
 import 'package:thecodyapp/storeApp/consts/utils.dart';
 import 'package:thecodyapp/storeApp/providers/cart_provider.dart';
+import 'package:thecodyapp/storeApp/providers/products_provider.dart';
 import 'package:thecodyapp/storeApp/screens/cart/cart_widget.dart';
 import 'package:thecodyapp/storeApp/widgets/empty_screen.dart';
 import 'package:thecodyapp/storeApp/widgets/text_widget.dart';
@@ -49,8 +50,10 @@ class _CartScreenState extends State<CartScreen> {
                       GlobalMethods.warningDialog(
                           title: 'Empty Your Cart?',
                           subtitle: 'Are You Sure?',
-                          fct: () {
-                            cartProvider.clearCart();
+                          fct: () async {
+                            await cartProvider.clearOnlineCart();
+                            cartProvider.clearLocalCart();
+                           
                           },
                           context: context);
                     },
@@ -85,6 +88,16 @@ class _CartScreenState extends State<CartScreen> {
 
   Widget _checkout({required BuildContext ctx}) {
     Size size = Utils(ctx).getScreenSize;
+    final cartProvider = Provider.of<CartProvider>(ctx);
+    final productProvider = Provider.of<ProductsProvider>(ctx);
+    double total = 0.0;
+    cartProvider.getCartItems.forEach((key, value) {
+      final getCurrentProduct = productProvider.findProdById(value.productId);
+      total += (getCurrentProduct.isOnSale
+              ? getCurrentProduct.salePrice
+              : getCurrentProduct.price) *
+          value.quantity;
+    });
     return SizedBox(
       width: double.infinity,
       height: size.height * 0.1,
@@ -103,14 +116,17 @@ class _CartScreenState extends State<CartScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextWidget(
-                      text: 'Order Now', color: Colors.white, textSize: 20),
+                    text: 'Order Now',
+                    color: Colors.white,
+                    textSize: 20,
+                  ),
                 ),
               ),
             ),
             const Spacer(),
             FittedBox(
               child: TextWidget(
-                text: 'Total: \$25.00',
+                text: 'Total: \$${total.toStringAsFixed(2)}',
                 color: Colors.white,
                 textSize: 18,
                 isTitle: true,

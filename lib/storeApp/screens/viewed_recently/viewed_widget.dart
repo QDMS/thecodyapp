@@ -25,6 +25,7 @@ class _ViewedRecentlyWidgetState extends State<ViewedRecentlyWidget> {
   Widget build(BuildContext context) {
     final productProvider = Provider.of<ProductsProvider>(context);
     final viewedProductModel = Provider.of<ViewedProductModel>(context);
+    
     final getCurrentProduct =
         productProvider.findProdById(viewedProductModel.productId);
     double usedPrice = getCurrentProduct.isOnSale
@@ -38,8 +39,8 @@ class _ViewedRecentlyWidgetState extends State<ViewedRecentlyWidget> {
       padding: const EdgeInsets.all(8.0),
       child: GestureDetector(
         onTap: () {
-            Navigator.pushNamed(context, ProductDetails.routeName,
-            arguments: viewedProductModel.productId);
+          Navigator.pushNamed(context, ProductDetails.routeName,
+              arguments: viewedProductModel.productId);
           // GlobalMethods.navigateTo(
           //     ctx: context, routeName: ProductDetails.routeName);
         },
@@ -87,10 +88,8 @@ class _ViewedRecentlyWidgetState extends State<ViewedRecentlyWidget> {
                 child: InkWell(
                     borderRadius: BorderRadius.circular(12),
                     onTap: isInCart
-                        ? () {
-                            cartProvider.removeOneItem(getCurrentProduct.id);
-                          }
-                        : () {
+                        ? null
+                        : () async {
                             final User? user = authInstance.currentUser;
                             if (user == null) {
                               GlobalMethods.errorDialog(
@@ -99,8 +98,13 @@ class _ViewedRecentlyWidgetState extends State<ViewedRecentlyWidget> {
                                   context: context);
                               return;
                             }
-                            cartProvider.addProductsToCart(
-                                productId: getCurrentProduct.id, quantity: 1);
+                            await GlobalMethods.addToCart(
+                                productId: viewedProductModel.id,
+                                quantity: 1,
+                                context: context);
+                            await cartProvider.fetchCart();
+                            // cartProvider.addProductsToCart(
+                            //     productId: getCurrentProduct.id, quantity: 1);
                           },
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),

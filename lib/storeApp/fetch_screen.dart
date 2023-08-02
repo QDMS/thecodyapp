@@ -1,6 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thecodyapp/chatApp/common/widgets/loader.dart';
+import 'package:thecodyapp/storeApp/consts/firebase_consts.dart';
+import 'package:thecodyapp/storeApp/providers/cart_provider.dart';
 import 'package:thecodyapp/storeApp/providers/products_provider.dart';
 import 'package:thecodyapp/storeApp/screens/btm_bar_screen.dart';
 
@@ -17,7 +20,16 @@ class _FetchScreenState extends State<FetchScreen> {
     Future.delayed(const Duration(microseconds: 5), () async {
       final productProvider =
           Provider.of<ProductsProvider>(context, listen: false);
-      await productProvider.fetchProducts();
+      final cartProvider = Provider.of<CartProvider>(context, listen: false);
+      final User? user = authInstance.currentUser;
+      if (user == null) {
+        await productProvider.fetchProducts();
+        cartProvider.clearLocalCart();
+      } else {
+        await productProvider.fetchProducts();
+        await cartProvider.fetchCart();
+      }
+
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => BottomBarScreen(),

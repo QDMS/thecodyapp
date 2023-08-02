@@ -58,12 +58,12 @@ class OnSaleWidget extends StatelessWidget {
                         children: [
                           TextWidget(
                             text: productModel.isPiece
-                                ? '1Piece'
+                                ? 'Piece'
                                 : productModel.isMonth
-                                    ? '1Month'
-                                    : '1Kg',
+                                    ? 'Month'
+                                    : 'Kg',
                             color: Colors.white,
-                            textSize: 22,
+                            textSize: 20,
                             isTitle: true,
                           ),
                           const SizedBox(
@@ -74,7 +74,7 @@ class OnSaleWidget extends StatelessWidget {
                               GestureDetector(
                                 onTap: isInCart
                                     ? null
-                                    : () {
+                                    : () async {
                                         final User? user =
                                             authInstance.currentUser;
                                         if (user == null) {
@@ -84,9 +84,14 @@ class OnSaleWidget extends StatelessWidget {
                                               context: context);
                                           return;
                                         }
-                                        cartProvider.addProductsToCart(
+                                        await GlobalMethods.addToCart(
                                             productId: productModel.id,
-                                            quantity: 1);
+                                            quantity: 1,
+                                            context: context);
+                                        await cartProvider.fetchCart();
+                                        // cartProvider.addProductsToCart(
+                                        //     productId: productModel.id,
+                                        //     quantity: 1);
                                       },
                                 child: Icon(
                                   isInCart ? IconlyBold.bag2 : IconlyLight.bag2,

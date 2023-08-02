@@ -175,8 +175,12 @@ class _CartWidgetState extends State<CartWidget> {
                       child: Column(
                         children: [
                           InkWell(
-                            onTap: () {
-                              cartProvider.removeOneItem(cartModel.productId);
+                            onTap: () async {
+                              await cartProvider.removeOneItem(
+                                cartId: cartModel.id,
+                                productId: cartModel.productId,
+                                quantity: cartModel.quantity,
+                              );
                             },
                             child: const Icon(
                               CupertinoIcons.cart_badge_minus,
@@ -187,17 +191,20 @@ class _CartWidgetState extends State<CartWidget> {
                           const SizedBox(
                             height: 5,
                           ),
-                         HeartBTN( productId: getCurrentProduct.id,
-                        isInWishlist: isInWishlist,),
+                          HeartBTN(
+                            productId: getCurrentProduct.id,
+                            isInWishlist: isInWishlist,
+                          ),
                           const SizedBox(
                             height: 5,
                           ),
                           TextWidget(
-                              text: '\$${usedPrice.toStringAsFixed(2)}',
-                              color: Colors.white,
-                              textSize: 18,
-                              maxLines: 1,
-                              ),
+                            text:
+                                '\$${(usedPrice * int.parse(_quantityTextController.text)).toStringAsFixed(2)}',
+                            color: Colors.white,
+                            textSize: 18,
+                            maxLines: 1,
+                          ),
                         ],
                       ),
                     ),

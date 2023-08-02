@@ -1,6 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:thecodyapp/chatApp/common/utils/colors.dart';
+import 'package:thecodyapp/storeApp/consts/firebase_consts.dart';
 import 'package:thecodyapp/storeApp/widgets/text_widget.dart';
+import 'package:uuid/uuid.dart';
 
 class GlobalMethods {
   static navigateTo({required BuildContext ctx, required String routeName}) {
@@ -45,7 +50,7 @@ class GlobalMethods {
               TextButton(
                 onPressed: () {
                   fct();
-                   if (Navigator.canPop(context)) {
+                  if (Navigator.canPop(context)) {
                     Navigator.pop(context);
                   }
                 },
@@ -86,11 +91,43 @@ class GlobalMethods {
                     Navigator.pop(context);
                   }
                 },
-                child: TextWidget(
-                    text: 'Ok', color: tabLabelColor, textSize: 20),
+                child:
+                    TextWidget(text: 'Ok', color: tabLabelColor, textSize: 20),
               ),
             ],
           );
         });
+  }
+
+  static Future<void> addToCart({
+    required String productId,
+    required int quantity,
+    required BuildContext context,
+  }) async {
+    final User? user = authInstance.currentUser;
+    final _uid = user!.uid;
+    final cartId = Uuid().v4();
+    try {
+      FirebaseFirestore.instance.collection('storeUsers').doc(_uid).update({
+        'userCart': FieldValue.arrayUnion([
+          {
+            'cartId': cartId,
+            'productId': productId,
+            'quantity': quantity
+          }
+        ])
+      });
+       await Fluttertoast.showToast(
+        msg: "Item/s has been added to your cart.",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: tabColor,
+        textColor: tabLabelColor,
+        fontSize: 16.0
+    );
+    } catch (error) {
+      errorDialog(subtitle: error.toString(), context: context);
+    }
   }
 }

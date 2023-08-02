@@ -54,9 +54,16 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
             ),
           ),
         ],
-        title: Image.asset(
-          Constants.storeAppBarLogo,
+        title: Container(
+         width: 80,
           height: 55,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              fit: BoxFit.fill,
+              image: AssetImage(
+                Constants.storeAppBarLogo
+            )),
+          ),
         ),
       ),
       body: _pages[_selectedIndex]['page'],

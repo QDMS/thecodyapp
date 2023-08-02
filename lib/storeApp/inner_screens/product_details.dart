@@ -352,7 +352,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                             child: InkWell(
                               onTap: isInCart
                                   ? null
-                                  : () {
+                                  : () async {
                                       // if (_isInCart) {
                                       //   return;
                                       // }
@@ -365,10 +365,16 @@ class _ProductDetailsState extends State<ProductDetails> {
                                             context: context);
                                         return;
                                       }
-                                      cartProvider.addProductsToCart(
+                                     await GlobalMethods.addToCart(
                                           productId: getCurrentProduct.id,
                                           quantity: int.parse(
-                                              _quantityTextController.text));
+                                              _quantityTextController.text),
+                                          context: context);
+                                           await cartProvider.fetchCart();
+                                      // cartProvider.addProductsToCart(
+                                      //     productId: getCurrentProduct.id,
+                                      //     quantity: int.parse(
+                                      //         _quantityTextController.text));
                                     },
                               borderRadius: BorderRadius.circular(10),
                               child: Padding(

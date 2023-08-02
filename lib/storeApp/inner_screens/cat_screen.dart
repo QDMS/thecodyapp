@@ -3,7 +3,7 @@ import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:provider/provider.dart';
 import 'package:thecodyapp/chatApp/screens/mobile_chat_screen_layout.dart';
 import 'package:thecodyapp/chatApp/common/utils/colors.dart';
-import 'package:thecodyapp/storeApp/consts/constss.dart';
+
 import 'package:thecodyapp/storeApp/consts/utils.dart';
 import 'package:thecodyapp/storeApp/models/products_model.dart';
 import 'package:thecodyapp/storeApp/providers/products_provider.dart';
@@ -22,6 +22,7 @@ class CategoryScreen extends StatefulWidget {
 class _CategoryScreenState extends State<CategoryScreen> {
   final TextEditingController _searchTextController = TextEditingController();
   final FocusNode _searchTextFocusNode = FocusNode();
+  List<ProductModel> listProductsSearch = [];
   @override
   void dispose() {
     _searchTextController.dispose();
@@ -33,9 +34,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
   Widget build(BuildContext context) {
     bool isEmpty = false;
     Size size = Utils(context).getScreenSize;
-    final productProviders = Provider.of<ProductsProvider>(context);
+    final productsProviders = Provider.of<ProductsProvider>(context);
     final catName = ModalRoute.of(context)!.settings.arguments as String;
-    List<ProductModel> productByCat = productProviders.findByCategory(catName);
+    List<ProductModel> productByCat = productsProviders.findByCategory(catName);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: appBarColor,
@@ -83,67 +84,82 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(10.0),
-                    child: TextField(
-                      focusNode: _searchTextFocusNode,
-                      cursorColor: Colors.black,
-                      controller: _searchTextController,
-                      onChanged: (value) {
-                        setState(() {});
-                      },
-                      textAlignVertical: TextAlignVertical.center,
-                      decoration: InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide:
-                              const BorderSide(color: tabColor, width: 1),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide:
-                              const BorderSide(color: tabLabelColor, width: 1),
-                        ),
-                        contentPadding: const EdgeInsets.only(top: 0),
-                        prefixIcon: Icon(
-                          IconlyLight.search,
-                          color: _searchTextFocusNode.hasFocus
-                              ? tabColor
-                              : tabLabelColor,
-                        ),
-                        hintStyle: const TextStyle(
-                          fontSize: 20,
-                        ),
-                        suffixIcon: IconButton(
-                          padding: const EdgeInsets.only(top: 0),
-                          icon: Icon(
-                            Icons.cancel,
+                    child: SizedBox(
+                      height: kBottomNavigationBarHeight,
+                      child: TextField(
+                        focusNode: _searchTextFocusNode,
+                        cursorColor: Colors.black,
+                        controller: _searchTextController,
+                        onChanged: (value) {
+                          setState(() {
+                            listProductsSearch =
+                                productsProviders.searchQuery(value);
+                          });
+                        },
+                        textAlignVertical: TextAlignVertical.center,
+                        decoration: InputDecoration(
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                const BorderSide(color: tabColor, width: 1),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                                color: tabLabelColor, width: 1),
+                          ),
+                          contentPadding: const EdgeInsets.only(top: 0),
+                          prefixIcon: Icon(
+                            IconlyLight.search,
                             color: _searchTextFocusNode.hasFocus
                                 ? tabColor
                                 : tabLabelColor,
                           ),
-                          onPressed: () {
-                            _searchTextController.clear();
-                            _searchTextFocusNode.unfocus();
-                          },
+                          hintStyle: const TextStyle(
+                            fontSize: 20,
+                          ),
+                          suffixIcon: IconButton(
+                            padding: const EdgeInsets.only(top: 0),
+                            icon: Icon(
+                              Icons.cancel,
+                              color: _searchTextFocusNode.hasFocus
+                                  ? tabColor
+                                  : tabLabelColor,
+                            ),
+                            onPressed: () {
+                              _searchTextController.clear();
+                              _searchTextFocusNode.unfocus();
+                            },
+                          ),
+                          hintText: "Search Cody Products",
                         ),
-                        hintText: "Search Cody Products",
                       ),
                     ),
                   ),
-                  GridView.count(
-                    shrinkWrap: true,
-                    crossAxisCount: 2,
-                    // crossAxisSpacing: 15,
-                    childAspectRatio: size.width / (size.height * 0.55),
-                    children: List.generate(
-                      productByCat.length,
-                      (index) {
-                        return ChangeNotifierProvider.value(
-                          value: productByCat[index],
-                          child: const FeedsWidget(),
-                        );
-                      },
-                    ),
-                  ),
+                  _searchTextController.text.isNotEmpty &&
+                          listProductsSearch.isEmpty
+                      ? EmptyProdWidget(
+                          text: 'No Product Found Please Try Another Keyword')
+                      : GridView.count(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          crossAxisCount: 2,
+                          // crossAxisSpacing: 15,
+                          childAspectRatio: size.width / (size.height * 0.55),
+                          children: List.generate(
+                            _searchTextController.text.isNotEmpty
+                                ? listProductsSearch.length
+                                : productByCat.length,
+                            (index) {
+                              return ChangeNotifierProvider.value(
+                                value: _searchTextController.text.isNotEmpty
+                                    ? listProductsSearch[index]
+                                    : productByCat[index],
+                                child: const FeedsWidget(),
+                              );
+                            },
+                          ),
+                        ),
                 ],
               ),
             ),
