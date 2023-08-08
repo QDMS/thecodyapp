@@ -3,7 +3,7 @@ import 'package:thecodyapp/chatApp/common/widgets/custom_button.dart';
 import 'package:thecodyapp/chatApp/features/auth/screens/chat_login_screen.dart';
 import 'package:thecodyapp/chatApp/common/utils/colors.dart';
 import 'package:thecodyapp/storeApp/consts/utils.dart';
-import 'package:thecodyapp/storeApp/fetch_screen.dart';
+import 'package:thecodyapp/storeApp/screens/fetch_screen.dart';
 import 'package:thecodyapp/storeApp/screens/auth/storeLogin.dart';
 import 'package:thecodyapp/storeApp/screens/btm_bar_screen.dart';
 
@@ -71,7 +71,7 @@ class _IntroScreenState extends State<IntroScreen> {
                             Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => const FetchScreen()));
+                                    builder: (context) => const StoreLoginScreen()));
                           },
                           buttonText: 'AGREE AND CONTINUE',
                           primary: tabLabelColor,

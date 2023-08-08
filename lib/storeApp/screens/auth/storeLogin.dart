@@ -10,7 +10,7 @@ import 'package:thecodyapp/chatApp/screens/mobile_chat_screen_layout.dart';
 import 'package:thecodyapp/storeApp/consts/constss.dart';
 import 'package:thecodyapp/storeApp/consts/firebase_consts.dart';
 import 'package:thecodyapp/storeApp/consts/global_methods.dart';
-import 'package:thecodyapp/storeApp/fetch_screen.dart';
+import 'package:thecodyapp/storeApp/screens/fetch_screen.dart';
 import 'package:thecodyapp/storeApp/screens/auth/storeRegister.dart';
 import 'package:thecodyapp/storeApp/screens/auth/storeforgot_pass.dart';
 import 'package:thecodyapp/storeApp/screens/btm_bar_screen.dart';
@@ -47,11 +47,12 @@ class _StoreLoginScreenState extends ConsumerState<StoreLoginScreen> {
   void _submitFormOnLogin() async {
     final isValid = _formKey.currentState!.validate();
     FocusScope.of(context).unfocus();
-    setState(() {
-      _isLoading = true;
-    });
+   
     if (isValid) {
       _formKey.currentState!.save();
+       setState(() {
+      _isLoading = true;
+    });
       try {
         await authInstance.signInWithEmailAndPassword(
             email: _emailTextController.text.toLowerCase().trim(),

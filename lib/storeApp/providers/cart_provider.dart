@@ -25,7 +25,7 @@ class CartProvider with ChangeNotifier {
   //   );
   //   notifyListeners();
   // }
-  
+
   final userCollection = FirebaseFirestore.instance.collection('storeUsers');
 
   Future<void> fetchCart() async {

@@ -20,8 +20,9 @@ import 'package:thecodyapp/storeApp/inner_screens/cat_screen.dart';
 import 'package:thecodyapp/storeApp/inner_screens/feeds_screen.dart';
 import 'package:thecodyapp/storeApp/inner_screens/on_sale_screen.dart';
 import 'package:thecodyapp/storeApp/inner_screens/product_details.dart';
-import 'package:thecodyapp/storeApp/provider/dark_theme_provider.dart';
+import 'package:thecodyapp/storeApp/providers/dark_theme_provider.dart';
 import 'package:thecodyapp/storeApp/providers/cart_provider.dart';
+import 'package:thecodyapp/storeApp/providers/orders_provider.dart';
 import 'package:thecodyapp/storeApp/providers/products_provider.dart';
 import 'package:thecodyapp/storeApp/providers/viewed_provider.dart';
 import 'package:thecodyapp/storeApp/providers/wishlist_provider.dart';
@@ -59,7 +60,7 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   Widget build(BuildContext context) {
     final ThemeData base = ThemeData.dark();
-    final User? storeUser = authInstance.currentUser;
+    final User? user = authInstance.currentUser;
     return FutureBuilder(
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -86,6 +87,9 @@ class _MyAppState extends ConsumerState<MyApp> {
               ),
               ChangeNotifierProvider(
                 create: (_) => ViewedProductProvider(),
+              ),
+              ChangeNotifierProvider(
+                create: (_) => OrdersProvider(),
               ),
             ],
             child: MaterialApp(

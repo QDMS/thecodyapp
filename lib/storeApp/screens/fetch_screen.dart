@@ -5,6 +5,7 @@ import 'package:thecodyapp/chatApp/common/widgets/loader.dart';
 import 'package:thecodyapp/storeApp/consts/firebase_consts.dart';
 import 'package:thecodyapp/storeApp/providers/cart_provider.dart';
 import 'package:thecodyapp/storeApp/providers/products_provider.dart';
+import 'package:thecodyapp/storeApp/providers/wishlist_provider.dart';
 import 'package:thecodyapp/storeApp/screens/btm_bar_screen.dart';
 
 class FetchScreen extends StatefulWidget {
@@ -21,13 +22,17 @@ class _FetchScreenState extends State<FetchScreen> {
       final productProvider =
           Provider.of<ProductsProvider>(context, listen: false);
       final cartProvider = Provider.of<CartProvider>(context, listen: false);
+      final wishlistProvider =
+          Provider.of<WishlistProvider>(context, listen: false);
       final User? user = authInstance.currentUser;
       if (user == null) {
         await productProvider.fetchProducts();
         cartProvider.clearLocalCart();
+        wishlistProvider.clearLocalWishlist();
       } else {
         await productProvider.fetchProducts();
         await cartProvider.fetchCart();
+        await wishlistProvider.fetchWishlist();
       }
 
       Navigator.of(context).pushReplacement(
@@ -35,8 +40,8 @@ class _FetchScreenState extends State<FetchScreen> {
           builder: (context) => BottomBarScreen(),
         ),
       );
-      super.initState();
     });
+    super.initState();
   }
 
   @override

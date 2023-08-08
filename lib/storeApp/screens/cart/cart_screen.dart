@@ -1,14 +1,20 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:thecodyapp/chatApp/common/utils/colors.dart';
+import 'package:thecodyapp/storeApp/consts/firebase_consts.dart';
 import 'package:thecodyapp/storeApp/consts/global_methods.dart';
 import 'package:thecodyapp/storeApp/consts/utils.dart';
 import 'package:thecodyapp/storeApp/providers/cart_provider.dart';
+import 'package:thecodyapp/storeApp/providers/orders_provider.dart';
 import 'package:thecodyapp/storeApp/providers/products_provider.dart';
 import 'package:thecodyapp/storeApp/screens/cart/cart_widget.dart';
 import 'package:thecodyapp/storeApp/widgets/empty_screen.dart';
 import 'package:thecodyapp/storeApp/widgets/text_widget.dart';
+import 'package:uuid/uuid.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -21,6 +27,7 @@ class _CartScreenState extends State<CartScreen> {
   @override
   Widget build(BuildContext context) {
     final cartProvider = Provider.of<CartProvider>(context);
+
     final cartItemsList =
         cartProvider.getCartItems.values.toList().reversed.toList();
     return cartItemsList.isEmpty
@@ -53,7 +60,6 @@ class _CartScreenState extends State<CartScreen> {
                           fct: () async {
                             await cartProvider.clearOnlineCart();
                             cartProvider.clearLocalCart();
-                           
                           },
                           context: context);
                     },
@@ -90,6 +96,7 @@ class _CartScreenState extends State<CartScreen> {
     Size size = Utils(ctx).getScreenSize;
     final cartProvider = Provider.of<CartProvider>(ctx);
     final productProvider = Provider.of<ProductsProvider>(ctx);
+    final ordersProvider = Provider.of<OrdersProvider>(ctx, listen: false);
     double total = 0.0;
     cartProvider.getCartItems.forEach((key, value) {
       final getCurrentProduct = productProvider.findProdById(value.productId);
@@ -112,7 +119,54 @@ class _CartScreenState extends State<CartScreen> {
               borderRadius: BorderRadius.circular(10),
               child: InkWell(
                 borderRadius: BorderRadius.circular(10),
-                onTap: () {},
+                onTap: () async {
+                  final productProvider =
+                      Provider.of<ProductsProvider>(ctx, listen: false);
+
+                  final User? user = authInstance.currentUser;
+                 
+
+                  cartProvider.getCartItems.forEach((key, value) async {
+                    final _uid = user!.uid;
+                    final getCurrentProduct =
+                        productProvider.findProdById(value.productId);
+                    try {
+                      final orderId = Uuid().v4();
+                      await FirebaseFirestore.instance
+                          .collection('orders')
+                          .doc(orderId)
+                          .set({
+                        'orderId': orderId,
+                        'userId': user.uid,
+                        'productId': value.productId,
+                        'price': (getCurrentProduct.isOnSale
+                                ? getCurrentProduct.salePrice
+                                : getCurrentProduct.price) *
+                            value.quantity,
+                        'totalPrice': total,
+                        'quantity': value.quantity,
+                        'imageUrl': getCurrentProduct.imageUrl,
+                        'username': user.displayName,
+                        // 'phoneNumber': user.phoneNumber,
+                        'orderDate': Timestamp.now(),
+                      });
+                      await cartProvider.clearOnlineCart();
+                      cartProvider.clearLocalCart();
+                      ordersProvider.fetchOrders();
+                      await Fluttertoast.showToast(
+                          msg: "Your order has been placed.",
+                          toastLength: Toast.LENGTH_LONG,
+                          gravity: ToastGravity.CENTER,
+                          timeInSecForIosWeb: 1,
+                          backgroundColor: tabColor,
+                          textColor: tabLabelColor,
+                          fontSize: 16.0);
+                    } catch (error) {
+                      GlobalMethods.errorDialog(
+                          subtitle: error.toString(), context: ctx);
+                    } finally {}
+                  });
+                },
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextWidget(

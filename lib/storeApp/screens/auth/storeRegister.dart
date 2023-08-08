@@ -9,9 +9,9 @@ import 'package:thecodyapp/chatApp/screens/mobile_chat_screen_layout.dart';
 import 'package:thecodyapp/storeApp/consts/constss.dart';
 import 'package:thecodyapp/storeApp/consts/firebase_consts.dart';
 import 'package:thecodyapp/storeApp/consts/global_methods.dart';
+import 'package:thecodyapp/storeApp/screens/fetch_screen.dart';
 import 'package:thecodyapp/storeApp/screens/auth/storeLogin.dart';
 import 'package:thecodyapp/storeApp/screens/auth/storeforgot_pass.dart';
-import 'package:thecodyapp/storeApp/screens/btm_bar_screen.dart';
 import 'package:thecodyapp/storeApp/screens/loading_manager.dart';
 
 import '../../widgets/auth_button.dart';
@@ -27,7 +27,6 @@ class StoreRegisterScreen extends StatefulWidget {
 
 class _StoreRegisterScreenState extends State<StoreRegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-
   final _fullNameController = TextEditingController();
   final _emailTextController = TextEditingController();
   final _passTextController = TextEditingController();
@@ -54,17 +53,20 @@ class _StoreRegisterScreenState extends State<StoreRegisterScreen> {
   void _submitFormOnRegister() async {
     final isValid = _formKey.currentState!.validate();
     FocusScope.of(context).unfocus();
-    setState(() {
-      _isLoading = true;
-    });
+
     if (isValid) {
       _formKey.currentState!.save();
+      setState(() {
+        _isLoading = true;
+      });
       try {
         await authInstance.createUserWithEmailAndPassword(
             email: _emailTextController.text.toLowerCase().trim(),
             password: _passTextController.text.trim());
         final User? user = authInstance.currentUser;
         final _uid = user!.uid;
+        user.updateDisplayName(_fullNameController.text);
+        user.reload();
         await FirebaseFirestore.instance
             .collection('storeUsers')
             .doc(_uid)
@@ -81,7 +83,7 @@ class _StoreRegisterScreenState extends State<StoreRegisterScreen> {
         if (context.mounted) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
-              builder: (context) => const BottomBarScreen(),
+              builder: (context) => const FetchScreen(),
             ),
           );
         }

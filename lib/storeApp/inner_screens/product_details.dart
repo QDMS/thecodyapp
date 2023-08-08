@@ -40,11 +40,13 @@ class _ProductDetailsState extends State<ProductDetails> {
   @override
   Widget build(BuildContext context) {
     Size size = Utils(context).getScreenSize;
-    final productProvider = Provider.of<ProductsProvider>(context);
+    
     final cartProvider = Provider.of<CartProvider>(context);
     final wishlistProvider = Provider.of<WishlistProvider>(context);
     final productId = ModalRoute.of(context)!.settings.arguments as String;
+    final productProvider = Provider.of<ProductsProvider>(context);
     final getCurrentProduct = productProvider.findProdById(productId);
+    
     bool? isInCart =
         cartProvider.getCartItems.containsKey(getCurrentProduct.id);
     bool? _isInWishlist =

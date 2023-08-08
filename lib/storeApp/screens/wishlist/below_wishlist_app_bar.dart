@@ -36,8 +36,9 @@ class BelowWishlistAppBar extends StatelessWidget {
               GlobalMethods.warningDialog(
                   title: 'Empty Your Wishlist?',
                   subtitle: 'Are You Sure?',
-                  fct: () {
-                    wishlistProvider.clearWishlist();
+                  fct: () async {
+                    await wishlistProvider.clearOnlineWishlist();
+                    wishlistProvider.clearLocalWishlist();
                   },
                   context: context);
             },
